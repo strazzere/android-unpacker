@@ -11,7 +11,10 @@ static const char* suffix = ".dumped_odex";
 
 // This is actually the filter APKProtect uses itself for finding it's own odex to modify
 static char* apkprotect_filter = ".apk@";
+static char* liapp_egg_filter = "LIAPPEgg.dex";
 
+static char* apkprotect_marker = "/libAPKProtect";
+static char* liapp_marker = "/LIAPPEgg";
 
 typedef struct {
   uint32_t start;

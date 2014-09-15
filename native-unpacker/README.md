@@ -1,7 +1,12 @@
 Kisskiss - Unpacker for various Android packers/protectors
 =============
 
-Basic example of an easy unpacker for Bangcle and APKProtect. Heavily commented so hopefully people can understand the flow and thinking behind the hacks going on.
+Basic example of an easy unpacker for Android. Heavily commented so hopefully people can understand the flow and thinking behind the hacks going on.
+
+Currently supports:
+ - Bangcle (SecNeo)
+ - APKProtect
+ - LIAPP (prerelease demo)
 
 **Usage:**
 

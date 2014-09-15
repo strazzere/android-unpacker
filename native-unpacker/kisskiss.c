@@ -9,6 +9,7 @@
  * Tested against malware packed with the following;
  *     - Bangcle (All versions)
  *     - APKProtect (native versions w/ crypto)
+ *     - LIAPP (prereleased demo)
  *
  *
  * This will dump the optimized dex (odex) file from
@@ -179,18 +180,19 @@ char *determine_filter(uint32_t clone_pid, int memory_fd) {
   char mem_line[1024];
   while(fscanf(maps_file, "%[^\n]\n", mem_line) >= 0) {
     // Currently it's "libAPKProtect.so" which is directly mapped to memory
-    if(strstr(mem_line, "/libAPKProtect")) {
+    if(strstr(mem_line, apkprotect_marker)) {
       printf("  [*] Found APKProtect!\n");
       return apkprotect_filter;
+    } else if(strstr(mem_line, liapp_marker)) {
+      printf("  [*] Found an Egg (LIAPP)!");
+      return liapp_egg_filter;
     }
   }
-
   printf("  [*] Nothing special found, assuming Bangcle...\n");
   // For now we assume it's Bangcle if above filters failed
 
   return NULL;
 }
-
 /*
  * Find the "magic" memory location we want, usually an odex so we are currently
  * recursing through the /proc/pid/maps and peeopling at memory locations using
