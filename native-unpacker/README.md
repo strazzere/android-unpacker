@@ -7,6 +7,7 @@ Currently supports:
  - Bangcle (SecNeo)
  - APKProtect
  - LIAPP (prerelease demo)
+ - Qihoo Android Packers
 
 **Usage:**
 

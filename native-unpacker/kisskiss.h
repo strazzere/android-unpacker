@@ -5,16 +5,17 @@
 #include <fcntl.h> // open / O_RDONLY
 
 static const char* odex_magic = "dey\n036";
-
 static const char* static_safe_location = "/data/local/tmp/";
 static const char* suffix = ".dumped_odex";
 
 // This is actually the filter APKProtect uses itself for finding it's own odex to modify
 static char* apkprotect_filter = ".apk@";
 static char* liapp_egg_filter = "LIAPPEgg.dex";
+static char* qihoo_monster_filter = "monster.dex";
 
 static char* apkprotect_marker = "/libAPKProtect";
 static char* liapp_marker = "/LIAPPEgg";
+static char* qihoo_monster_marker = "/libprotectClass";
 
 typedef struct {
   uint32_t start;

@@ -10,6 +10,7 @@
  *     - Bangcle (All versions)
  *     - APKProtect (native versions w/ crypto)
  *     - LIAPP (prereleased demo)
+ *     - Qihoo Packer
  *
  *
  * This will dump the optimized dex (odex) file from
@@ -184,8 +185,11 @@ char *determine_filter(uint32_t clone_pid, int memory_fd) {
       printf("  [*] Found APKProtect!\n");
       return apkprotect_filter;
     } else if(strstr(mem_line, liapp_marker)) {
-      printf("  [*] Found an Egg (LIAPP)!");
+      printf("  [*] Found an Egg (LIAPP)!\n");
       return liapp_egg_filter;
+    } else if(strstr(mem_line, qihoo_monster_marker)) {
+      printf("  [*] Found a Monster (Qihoo)!\n");
+      return qihoo_monster_filter;
     }
   }
   printf("  [*] Nothing special found, assuming Bangcle...\n");
@@ -245,7 +249,7 @@ int peek_memory(int memory_file, uint32_t address) {
   if(8 != pread(memory_file, magic, 8, address))
     return -1;
 
-  // We are currently just dumping odex files and letting the packers/protectors do all
+  // We are currently just dumping odex or jar files, letting the packers/protectors do all
   // the heavy lifting for us
   if(strcmp(magic, odex_magic) == 0)
     return 1;
