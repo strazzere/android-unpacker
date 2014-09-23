@@ -24,6 +24,7 @@
  */
 
 #include "kisskiss.h"
+#include "definitions.h"
 
 int main(int argc, char *argv[]) {
 
@@ -180,16 +181,13 @@ char *determine_filter(uint32_t clone_pid, int memory_fd) {
   // Scan the /proc/pid/maps file and currently hardcoded shared lib names
   char mem_line[1024];
   while(fscanf(maps_file, "%[^\n]\n", mem_line) >= 0) {
-    // Currently it's "libAPKProtect.so" which is directly mapped to memory
-    if(strstr(mem_line, apkprotect_marker)) {
-      printf("  [*] Found APKProtect!\n");
-      return apkprotect_filter;
-    } else if(strstr(mem_line, liapp_marker)) {
-      printf("  [*] Found an Egg (LIAPP)!\n");
-      return liapp_egg_filter;
-    } else if(strstr(mem_line, qihoo_monster_marker)) {
-      printf("  [*] Found a Monster (Qihoo)!\n");
-      return qihoo_monster_filter;
+    // Iterate through all markers to find proper filter
+    int i;
+    for(i = 0; i < sizeof(packers) / sizeof(packers[0]); i++) {
+      if(strstr(mem_line, packers[i].marker)) {
+	printf("  [*] Found %s\n", packers[i].name);
+	return packers[i].filter;
+      }
     }
   }
   printf("  [*] Nothing special found, assuming Bangcle...\n");
