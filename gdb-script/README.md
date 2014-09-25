@@ -19,8 +19,11 @@ Older samples may require a 4.3 or lower device, new samples appear to work on 4
  The application you wish to unpack should be installed and running.
 <pre>
       $ ./playdead.sh com.package.name.to.unpack
+      $ ./unpack.sh com.package.name.to.unpack # This is for mac
 </pre>
 
 2. Reverse!
 
 This isn't really a good script, or the best way. Though I wanted to ensure people might have a decent example of getting this type of scripting/unpacking stype working.
+
+
