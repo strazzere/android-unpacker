@@ -18,8 +18,7 @@ Older samples may require a 4.3 or lower device, new samples appear to work on 4
  Also ensure you only have one device connected and accessable to adb.
  The application you wish to unpack should be installed and running.
 <pre>
-      $ ./playdead.sh com.package.name.to.unpack
-      $ ./unpack.sh com.package.name.to.unpack # This is for mac
+      $ ./playdead.sh com.package.name.to.unpack    # this script is the origin script
 </pre>
 
 2. Reverse!
@@ -27,3 +26,10 @@ Older samples may require a 4.3 or lower device, new samples appear to work on 4
 This isn't really a good script, or the best way. Though I wanted to ensure people might have a decent example of getting this type of scripting/unpacking stype working.
 
 
+
+Modify
+======
+<pre>
+      $ ./unpack.sh   com.package.name.to.unpack    # This is for mac
+      $ ./playdead.py com.package.name.to.unpack    # This is the python version.
+</pre>
