@@ -34,13 +34,12 @@ Modify
       $ ./playdead.py com.package.name.to.unpack    # This is the python version.
 </pre>
 
-gdb for android
+Download/install gdb for android
 ======
-Download/install gdb
 Run the commands at an adb command line. This will require a working busybox (tar, wget) in your path. Running under a terminal will require adjusting your paths.
 <pre>
     $ cd /data/local/tmp
     $ wget http://dan.drown.org/android/gdb-static.tar.gz
     $ tar zxf gdb-static.tar.gz
-
 </pre>
+REF :  http://dan.drown.org/android/howto/gdb.html 
