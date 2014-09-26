@@ -10,7 +10,7 @@ Assumptions made:
  - baksmali and smali are located in ~/bin/*
 
 Works on a year+ old sample and one found as recenty as today (7/16/04)
-Older samples may require a 4.3 or lower device, new samples appear to work on 4.4 well   
+Older samples may require a 4.3 or lower device, new samples appear to work on 4.4 well
 
 **Usage:**
 
@@ -18,7 +18,7 @@ Older samples may require a 4.3 or lower device, new samples appear to work on 4
  Also ensure you only have one device connected and accessable to adb.
  The application you wish to unpack should be installed and running.
 <pre>
-      $ ./playdead.sh com.package.name.to.unpack    # this script is the origin script
+      $ ./playdead.sh com.package.name.to.unpack    # for linux
 </pre>
 
 2. Reverse!
@@ -30,8 +30,8 @@ This isn't really a good script, or the best way. Though I wanted to ensure peop
 Modify
 ======
 <pre>
-      $ ./unpack.sh   com.package.name.to.unpack    # This is for mac
-      $ ./playdead.py com.package.name.to.unpack    # This is the python version.
+      $ ./unpack.sh   com.package.name.to.unpack    # for mac
+      $ ./playdead.py com.package.name.to.unpack    # for win
 </pre>
 
 Download/install gdb for android
@@ -42,4 +42,4 @@ Run the commands at an adb command line. This will require a working busybox (ta
     $ wget http://dan.drown.org/android/gdb-static.tar.gz
     $ tar zxf gdb-static.tar.gz
 </pre>
-REF :  http://dan.drown.org/android/howto/gdb.html 
+REF :  http://dan.drown.org/android/howto/gdb.html
