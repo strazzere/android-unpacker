@@ -31,7 +31,7 @@ Modify
 ======
 <pre>
       $ ./unpack.sh   com.package.name.to.unpack    # for mac
-      $ ./playdead.py com.package.name.to.unpack    # for win
+      $ ./playdead.py com.package.name.to.unpack    # for mac/linux/win
 </pre>
 
 Download/install gdb for android
