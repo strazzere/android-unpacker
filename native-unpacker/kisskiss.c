@@ -225,7 +225,7 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
 
     char mem_address_start[10];
     char mem_address_end[10];
-    sscanf(mem_line, "%8[^-]-%8[^ ]", mem_address_start, mem_address_end, mem_line);
+    sscanf(mem_line, "%8[^-]-%8[^ ]", mem_address_start, mem_address_end);
 
     uint32_t mem_start = strtoul(mem_address_start, NULL, 16);
     // Peek and see if the memory is what we wanted
