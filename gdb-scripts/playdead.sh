@@ -46,7 +46,7 @@ get_memory_address() {
 
 get_clone() {
     retained_return=$(adb shell ls /proc/$SERVICE_PID/task/ | tail -1)
-    echo ${retained_return%?}
+    echo ${retained_return}
 }
 
 dump_memory() {
