@@ -7,7 +7,6 @@ Contents
 --------
 
  - AHPL0 - Android Hacker Protection Level 0 + some blackphone stuff slides
-
  - gdb-scripts/ - Bash script for unpacking bangcle/secshell; requires gdb/adb
  - native-unpacker/ - Unpacker for APKProtect/Bangcle/LIAPP/Qihoo Packer that runs natively, no dependency on gdb
  - hide-qemu/ - Small hacks for hiding the qemu/debuggers, specifically from APKProtect
