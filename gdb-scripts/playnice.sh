@@ -28,19 +28,19 @@ then
 	if [[ $line != */* ]]
 	then
 	    MEM_LINE=$line
-        MEM_LINE=`echo -n $MEM_LINE | cut -c1-17`
-        MEMORY_START=`echo -n $MEM_LINE | cut -d'-' -f1`
-        MEMORY_END=`echo -n $MEM_LINE | cut -d'-' -f2`
+            MEM_LINE=`echo -n $MEM_LINE | cut -c1-17`
+            MEMORY_START=`echo -n $MEM_LINE | cut -d'-' -f1`
+            MEMORY_END=`echo -n $MEM_LINE | cut -d'-' -f2`
 
-        echo "Searching 0x$MEMORY_START - 0x$MEMORY_END for \"$DEX_MAGIC\""
-        FOUND=($(adb shell su -c "/data/local/tmp/gdb --batch --pid $CLONE -ex 'find 0x$MEMORY_START, 0x$MEMORY_END, \"$DEX_MAGIC\"'" | tail -2))
+            echo "Searching 0x$MEMORY_START - 0x$MEMORY_END for \"$DEX_MAGIC\""
+            FOUND=($(adb shell su -c "/data/local/tmp/gdb --batch --pid $CLONE -ex 'find 0x$MEMORY_START, 0x$MEMORY_END, \"$DEX_MAGIC\"'" | tail -2))
 
-        # Search for "pattern found"
-        echo ${FOUND[1]} | grep -q $FOUND_STR
-        if [[ $? -eq 0 ]]; then
-            DEX_START=$(echo ${FOUND[0]} | tr -d "\r")
-            break
-        fi
+            # Search for "pattern found"
+            echo ${FOUND[1]} | grep -q $FOUND_STR
+            if [[ $? -eq 0 ]]; then
+		DEX_START=$(echo ${FOUND[0]} | tr -d "\r")
+		break
+            fi
 	fi
     done
 
@@ -58,7 +58,7 @@ then
 		        adb pull /data/local/tmp/dump.dex
 		        adb shell rm /data/local/tmp/dump.dex
 	        fi
-	fi
+	    fi
     else
 	    echo 'Unable to find memory region to dump!'
     fi
