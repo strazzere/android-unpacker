@@ -9,6 +9,10 @@ Currently supports:
  - LIAPP (prerelease demo)
  - Qihoo Android Packers
 
+**Compiling:**
+
+The only prerequisite for the unpacker to build is to have the Android NDK  [installed](https://developer.android.com/tools/sdk/ndk/index.html#Installing).
+
 **Usage:**
 
 1. Compile: (Assumes ndk-build and $ANDROID_NDK_SYSROOT are properly set)
