@@ -1,7 +1,7 @@
 /*
  * kisskiss.h
  *
- * Tim "diff" Strazzere <diff@lookout.com>
+ * Tim "diff" Strazzere <strazz@gmail.com>
  */
 
 #include <stdlib.h>

@@ -1,7 +1,7 @@
 /*
  * stupid hide qemu ld_preload hack for APKProtect
  *
- * Tim "diff" Strazzere <diff@lookout.com>
+ * Tim "diff" Strazzere <strazz@gmail.com>
  *
  * Likely took a some of code from @pof :)
  *   https://github.com/poliva/ldpreloadhook

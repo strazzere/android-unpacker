@@ -1,7 +1,7 @@
 /*
  * Header file for the definitions of packers/protectors
  *
- * Tim "diff" Strazzere <diff@lookout.com>
+ * Tim "diff" Strazzere <strazz@gmail.com>
  */
 
 typedef struct {

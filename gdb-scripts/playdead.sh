@@ -2,7 +2,7 @@
 #
 # Playdead - Bangcle generic unpacking script
 #
-# Tim 'diff' Strazzere <diff@lookout.com>
+# Tim 'diff' Strazzere <strazz@gmail.com>
 #
 # Assumptions made:
 #  - there is only one device running for adb to connect to (target device)

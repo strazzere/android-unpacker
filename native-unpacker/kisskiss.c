@@ -1,7 +1,7 @@
 /*
  * Unpacker for various Android packers/protectors
  *
- * Tim 'diff' Strazzere <diff@lookout.com>
+ * Tim 'diff' Strazzere <strazz@gmail.com>
  *"
  * For education use only - find them malwares
  *
