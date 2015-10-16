@@ -1,14 +1,11 @@
 LOCAL_ARM_MODE := arm
 
-ifndef ANDROID_NDK_ROOT
-        $(error ANDROID_NDK_ROOT is undefined - ensure Android NDK is properly configured)
-endif
+all: check build
 
-ifndef ANDROID_NDK_SYSROOT
-        $(error ANDROID_NDK_SYSROOT is undefined - ensure Android NDK is properly configured)
+check:
+ifeq (, $(shell which ndk-build))
+        $(error "No 'ndk-build' in PATH, please install Android NDK and configure properly")
 endif
-
-all: build
 
 build:
 	ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk

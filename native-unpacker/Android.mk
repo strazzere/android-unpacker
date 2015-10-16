@@ -4,7 +4,9 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
   kisskiss.c
-LOCAL_C_INCLUDE := $(ANDROID_NDK_SYSROOT)/usr/include/
+LOCAL_C_INCLUDE := \
+  kisskiss.h \
+  definitions.h
 
 LOCAL_MODULE := kisskiss
 LOCAL_MODULE_TAGS := optional

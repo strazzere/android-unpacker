@@ -11,11 +11,11 @@ Currently supports:
 
 **Compiling:**
 
-The only prerequisite for the unpacker to build is to have the Android NDK  [installed](https://developer.android.com/tools/sdk/ndk/index.html#Installing).
+The only prerequisite for the unpacker to build is to have the Android NDK [installed](https://developer.android.com/ndk/guides/setup.html#install).
 
 **Usage:**
 
-1. Compile: (Assumes ndk-build and $ANDROID_NDK_SYSROOT are properly set)
+1. Compile: (Assumes the NDK was properly installed and `PATH` variable updated, see link above)
 <pre>
       $ make
 </pre>
