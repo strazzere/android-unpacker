@@ -28,7 +28,7 @@
 
 int main(int argc, char *argv[]) {
 
-  printf("[*] Android Dalvik Unpacker/Unprotector - <diff@lookout.com>\n");
+  printf("[*] Android Dalvik Unpacker/Unprotector - <strazz@gmail.com>\n");
 
   if(argc <= 0) {
     printf(" [!] Nothing to unpack, quitting\n");
