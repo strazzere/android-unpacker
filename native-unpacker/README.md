@@ -9,6 +9,8 @@ Currently supports:
  - LIAPP (prerelease demo)
  - Qihoo Android Packers
 
+This _should_ work on ARM and x86 devices. Please note that ptrace can and often is disabled or messed up on newer SELinux devices. You should either use a device/emulator which does not have SELinux enabled or disable it prior to ruinning this.
+
 **Compiling:**
 
 The only prerequisite for the unpacker to build is to have the Android NDK [installed](https://developer.android.com/ndk/guides/setup.html#install).
