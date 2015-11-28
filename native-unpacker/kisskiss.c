@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 
   int mem_file = attach_get_memory(clone_pid);
   if(mem_file == -1) {
-    printf(" [!] An error occured attaching and finding the memory!\n");
+    printf(" [!] An error occurred attaching and finding the memory!\n");
     return -1;
   }
 
