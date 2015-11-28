@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
   char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix));
   sprintf(dumped_file_name, "%s%s%s", static_safe_location, package_name, suffix);
   if(dump_memory(mem_file, &memory, dumped_file_name) <= 0) {
-    printf(" [!] An issue occured trying to dump the memory to a file!\n");
+    printf(" [!] An issue occurred trying to dump the memory to a file!\n");
     return -1;
   }
   printf(" [+] Unpacked/protected file dumped to : %s\n", dumped_file_name);
