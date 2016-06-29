@@ -22,6 +22,14 @@ static packer packers[] = {
     "/libAPKProtect"
   },
 
+  // Bangcle (??) or something equally silly
+  {
+    "Bangcle (??) silly version",
+    "Something silly used by malware",
+    "classes.dex",
+    "/app_lib/"
+  },
+
   // LIAPP
   {
     "LIAPP 'Egg' (v1->?)",
