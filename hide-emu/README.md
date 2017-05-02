@@ -21,4 +21,4 @@ Very basic ld_preload hack to circumvent the anti-qemud detection in APKProtect
       #setprop wrap.%PACKAGE_NAME% LD_PRELOAD=/data/local/tmp/libhide.so
 </pre>
 
-Run the APK, it should not be wrapped - though it will be much more slow since this is a bad hack.
+Run the APK, it should now be wrapped - though it will be much more slow since this is a bad hack.
