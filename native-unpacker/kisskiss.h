@@ -9,14 +9,17 @@
 #include <sys/ptrace.h>
 #include <dirent.h>
 #include <fcntl.h> // open / O_RDONLY
+#include <unistd.h> // close
+#include <errno.h> // perror
+#include <string.h> // strlen
 
 static const char* odex_magic = "dey\n036";
 static const char* static_safe_location = "/data/local/tmp/";
 static const char* suffix = ".dumped_odex";
 
 typedef struct {
-  uint32_t start;
-  uint32_t end;
+  uint64_t start;
+  uint64_t end;
 } memory_region;
 
 uint32_t get_clone_pid(uint32_t service_pid);
