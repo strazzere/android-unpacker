@@ -66,8 +66,8 @@ int main(int argc, char *argv[]) {
   // Determine if we are dealing with APKProtect or Bangcle
   char *extra_filter = determine_filter(clone_pid, mem_file);
 
-  memory_region memory;
-  if(find_magic_memory(clone_pid, mem_file, &memory, extra_filter) <= 0) {
+  memory_region *memory = malloc(sizeof(memory_region));
+  if(find_magic_memory(clone_pid, mem_file, memory, extra_filter) <= 0) {
     printf(" [!] Something unexpected happened, new version of packer/protectors? Or it wasn't packed/protected!\n");
     return -1;
   }
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
   // Build a safe file to dump to and call the memory dumping function
   char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix) + 1);
   sprintf(dumped_file_name, "%s%s%s", static_safe_location, package_name, suffix);
-  if(dump_memory(mem_file, &memory, dumped_file_name) <= 0) {
+  if(dump_memory(mem_file, memory, dumped_file_name) <= 0) {
     printf(" [!] An issue occurred trying to dump the memory to a file!\n");
     return -1;
   }
@@ -215,6 +215,7 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
     return -1;
 
   // Scan the /proc/pid/maps file and find possible memory of interest
+  // Currently this loops until we find the /last/ odex file which is usually correct
   char mem_line[1024];
   while(fscanf(maps_file, "%[^\n]\n", mem_line) >= 0) {
 
@@ -232,11 +233,11 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
     char mem_address_end[10];
     sscanf(mem_line, "%8[^-]-%8[^ ]", mem_address_start, mem_address_end);
 
-    uint32_t mem_start = strtoul(mem_address_start, NULL, 16);
+    uint64_t mem_start = strtoul(mem_address_start, NULL, 16);
     // Peek and see if the memory is what we wanted
     if(peek_memory(memory_fd, mem_start)) {
       memory->start = mem_start;
-      memory->end = strtoul(mem_address_end, NULL, 16);
+      memory->end = strtoull(mem_address_end, NULL, 16);
       ret = 1;
     }
   }
@@ -246,10 +247,10 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
 }
 
 // Just peek at the memory to see if it contains an odex we want
-int peek_memory(int memory_file, uint32_t address) {
+int peek_memory(int memory_file, uint64_t address) {
   char magic[8];
 
-  if(8 != pread(memory_file, magic, 8, address))
+  if(8 != pread(memory_file, magic, sizeof(magic), address))
     return -1;
 
   // We are currently just dumping odex or jar files, letting the packers/protectors do all
@@ -268,14 +269,14 @@ int dump_memory(int memory_fd, memory_region *memory, const char *file_name) {
   int ret;
   char *buffer = malloc(memory->end - memory->start);
 
-  printf(" [+] Attempting to dump memory region 0x%lx to 0x%lx\n", memory->start, memory->end);
+  printf(" [+] Attempting to dump memory region 0x%llx to 0x%llx\n", memory->start, memory->end);
 
   if(check_fd < 0) {
     perror(" [!] Appears to be an issue with memory fd ");
     return -1;
   }
 
-  int read = pread(memory_fd, buffer, memory->end - memory->start, memory->start);
+  ssize_t read = pread64(memory_fd, buffer, (size_t)(memory->end - memory->start), (off64_t)(memory->start));
   if(read < 0 ) {
     perror(" [!] pread seems to have failed ");
     return -1;
