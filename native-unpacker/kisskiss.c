@@ -87,6 +87,10 @@ int main(int argc, char *argv[]) {
   return 1;
 }
 
+int check_fd(int fd) {
+  return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+}
+
 /*
  * Since most of these tools provide "anti-debugging" features using ptrace,
  * we are going to take advantage of the Android app lifecycle and just steal
@@ -195,6 +199,7 @@ char *determine_filter(uint32_t clone_pid, int memory_fd) {
 
   return NULL;
 }
+
 /*
  * Find the "magic" memory location we want, usually an odex so we are currently
  * recursing through the /proc/pid/maps and peeopling at memory locations using
@@ -263,11 +268,21 @@ int dump_memory(int memory_fd, memory_region *memory, const char *file_name) {
   int ret;
   char *buffer = malloc(memory->end - memory->start);
 
-  printf(" [+] Attempting to dump memory region 0x%x to 0x%x\n", memory->start, memory->end);
+  printf(" [+] Attempting to dump memory region 0x%lx to 0x%lx\n", memory->start, memory->end);
+
+  if(check_fd < 0) {
+    perror(" [!] Appears to be an issue with memory fd ");
+    return -1;
+  }
 
   int read = pread(memory_fd, buffer, memory->end - memory->start, memory->start);
+  if(read < 0 ) {
+    perror(" [!] pread seems to have failed ");
+    return -1;
+  }
+
   if((memory->end - memory->start) != read) {
-    printf(" [!] pread seems to have failed!\n");
+    printf(" [!] pread did not read the expected amount of memory!\n");
     return -1;
   }
 
