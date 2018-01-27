@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
   printf(" [+] Unpacked odex found in memory!\n");
 
   // Build a safe file to dump to and call the memory dumping function
-  char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix));
+  char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix) + 1);
   sprintf(dumped_file_name, "%s%s%s", static_safe_location, package_name, suffix);
   if(dump_memory(mem_file, &memory, dumped_file_name) <= 0) {
     printf(" [!] An issue occurred trying to dump the memory to a file!\n");
