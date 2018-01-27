@@ -24,7 +24,7 @@ static packer packers[] = {
 
   // Bangcle (??) or something equally silly
   {
-    "Bangcle (??) silly version",
+    "Bangcle (?) silly version",
     "Something silly used by malware",
     "/app_lib/classes.dex",
     "/app_lib/"
