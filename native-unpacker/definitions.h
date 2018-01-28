@@ -30,6 +30,16 @@ static packer packers[] = {
     "/app_lib/"
   },
 
+  /*
+  // Jaigu
+  {
+    "Jaigu",
+    "Jaigu generic unpacker",
+    "/.jiagu/libjiagu.so",
+    // Always after the last dalvik cache
+  },
+  */
+
   // LIAPP
   {
     "LIAPP 'Egg' (v1->?)",
