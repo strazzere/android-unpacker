@@ -235,10 +235,16 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
 
     uint64_t mem_start = strtoul(mem_address_start, NULL, 16);
     // Peek and see if the memory is what we wanted
-    if(peek_memory(memory_fd, mem_start)) {
+    int result = peek_memory(memory_fd, mem_start);
+    if(result == 1) {
+      // Found odex
       memory->start = mem_start;
       memory->end = strtoull(mem_address_end, NULL, 16);
       ret = 1;
+    } else if(result == 0) {
+      // Not an odex
+    } else {
+      perror(" [!] Error peeking at memory ");
     }
   }
 
@@ -250,11 +256,18 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
 int peek_memory(int memory_file, uint64_t address) {
   char magic[8];
 
-  if(8 != pread(memory_file, magic, sizeof(magic), address))
+  int read = pread64(memory_file, magic, 8, address);
+  if(read < 0) {
+    perror(" [!] pread seems to have failed ");
     return -1;
+  }
 
+  if(read != 8) {
+    return -1;
+  }
   // We are currently just dumping odex or jar files, letting the packers/protectors do all
   // the heavy lifting for us
+
   if(strcmp(magic, odex_magic) == 0)
     return 1;
 
@@ -277,7 +290,7 @@ int dump_memory(int memory_fd, memory_region *memory, const char *file_name) {
   }
 
   ssize_t read = pread64(memory_fd, buffer, (size_t)(memory->end - memory->start), (off64_t)(memory->start));
-  if(read < 0 ) {
+  if(read < 0) {
     perror(" [!] pread seems to have failed ");
     return -1;
   }
