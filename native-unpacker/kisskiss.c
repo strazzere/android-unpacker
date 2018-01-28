@@ -83,7 +83,6 @@ int main(int argc, char *argv[]) {
     // Build a safe file to dump to and call the memory dumping function
     char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix) + 1 /* _ */ + (found == 0 ? 1 : (int) (log10(found) + 1) + 1));
     sprintf(dumped_file_name, "%s%s%s_%d", static_safe_location, package_name, suffix, output);
-    printf("3 %s\n", dumped_file_name);
     int result = dump_memory(class_path, mem_file, memory[i], dumped_file_name);
     if(result < 0) {
       printf(" [!] An issue occurred trying to dump the memory to a file!\n");
