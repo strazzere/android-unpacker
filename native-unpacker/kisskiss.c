@@ -13,7 +13,7 @@
  *     - Qihoo Packer
  *
  *
- * This will dump the optimized dex (odex) file from
+ * This will dump the dex or optimized dex (odex) files from
  * the system, meaning you will have to pull the
  * framework files to be able to deodex (in needed)
  * for the original dex file.
@@ -66,22 +66,24 @@ int main(int argc, char *argv[]) {
   // Determine if we are dealing with APKProtect or Bangcle
   char *extra_filter = determine_filter(clone_pid, mem_file);
 
-  memory_region *memory = malloc(sizeof(memory_region));
-  if(find_magic_memory(clone_pid, mem_file, memory, extra_filter) <= 0) {
+  memory_region *memory[128] = { 0 }; //malloc(sizeof(memory_region));
+  int found;
+  if((found = find_magic_memory(clone_pid, mem_file, memory[found], extra_filter)) <= 0) {
     printf(" [!] Something unexpected happened, new version of packer/protectors? Or it wasn't packed/protected!\n");
     return -1;
   }
-  printf(" [+] Unpacked odex found in memory!\n");
 
-  // Build a safe file to dump to and call the memory dumping function
-  char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix) + 1);
-  sprintf(dumped_file_name, "%s%s%s", static_safe_location, package_name, suffix);
-  if(dump_memory(mem_file, memory, dumped_file_name) <= 0) {
-    printf(" [!] An issue occurred trying to dump the memory to a file!\n");
-    return -1;
+  printf(" [+] Found %d potentially interesting memory locations...\n", found);
+  for(int i = 0; i < found; i++) {
+    // Build a safe file to dump to and call the memory dumping function
+    char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix) + 1 /* _ */ + (found == 0 ? 1 : (int) (log10(found) + 1) + 1));
+    sprintf(dumped_file_name, "%s%s%s_%d", static_safe_location, package_name, suffix, found);
+    if(dump_memory(mem_file, memory[found], dumped_file_name) <= 0) {
+      printf(" [!] An issue occurred trying to dump the memory to a file!\n");
+      return -1;
+    }
+    printf(" [+] Unpacked/protected file dumped to : %s\n", dumped_file_name);
   }
-  printf(" [+] Unpacked/protected file dumped to : %s\n", dumped_file_name);
-
   close(mem_file);
   ptrace(PTRACE_DETACH, clone_pid, NULL, 0);
   return 1;
@@ -204,9 +206,10 @@ char *determine_filter(uint32_t clone_pid, int memory_fd) {
  * Find the "magic" memory location we want, usually an odex so we are currently
  * recursing through the /proc/pid/maps and peeopling at memory locations using
  * the peek_memory function.
+ *
+ * returns number of interesting memory locations found
  */
 int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, char *extra_filter) {
-  int ret = 0;
   char maps[1024];
   snprintf(maps, sizeof(maps), "/proc/%d/maps", clone_pid);
 
@@ -217,6 +220,8 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
   // Scan the /proc/pid/maps file and find possible memory of interest
   // Currently this loops until we find the /last/ odex file which is usually correct
   char mem_line[1024];
+  off64_t offsets[128] = { 0 };
+  int found = 0;
   while(fscanf(maps_file, "%[^\n]\n", mem_line) >= 0) {
 
     // For APKProtect we want the odex file that is mapped to memory
@@ -235,28 +240,29 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
 
     uint64_t mem_start = strtoul(mem_address_start, NULL, 16);
     // Peek and see if the memory is what we wanted
-    int result = peek_memory(memory_fd, mem_start);
-    if(result == 1) {
-      // Found odex
-      memory->start = mem_start;
+    off64_t offset = peek_memory(memory_fd, mem_start);
+    if(offset >= 0) {
+      // Found a magic
+      memory->start = mem_start + offset;
       memory->end = strtoull(mem_address_end, NULL, 16);
-      ret = 1;
-    } else if(result == 0) {
-      // Not an odex
+      offsets[found++] = offset;
+    } else if(offset == -99) {
+      // No offset found
     } else {
       perror(" [!] Error peeking at memory ");
     }
   }
 
   fclose(maps_file);
-  return ret;
+  return found;
 }
 
 // Just peek at the memory to see if it contains an odex we want
-int peek_memory(int memory_file, uint64_t address) {
-  char magic[8];
+// return value is the offset into memory of magic being found
+off64_t peek_memory(int memory_file, uint64_t address) {
+  char buffer[8];
 
-  int read = pread64(memory_file, magic, 8, address);
+  int read = pread64(memory_file, buffer, 8, address);
   if(read < 0) {
     perror(" [!] pread seems to have failed ");
     return -1;
@@ -267,11 +273,15 @@ int peek_memory(int memory_file, uint64_t address) {
   }
   // We are currently just dumping odex or jar files, letting the packers/protectors do all
   // the heavy lifting for us
+  char* result = strstr(buffer, dex_magic);
+  if(result != NULL)
+    return result - buffer;
 
-  if(strcmp(magic, odex_magic) == 0)
-    return 1;
+  result = strstr(buffer, odex_magic);
+  if(result != NULL)
+    return result - buffer;
 
-  return 0;
+  return -99;
 }
 
 /*
