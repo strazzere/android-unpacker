@@ -66,27 +66,47 @@ int main(int argc, char *argv[]) {
   // Determine if we are dealing with APKProtect or Bangcle
   char *extra_filter = determine_filter(clone_pid, mem_file);
 
-  memory_region *memory[128] = { 0 }; //malloc(sizeof(memory_region));
-  int found;
-  if((found = find_magic_memory(clone_pid, mem_file, memory[found], extra_filter)) <= 0) {
+  memory_region *memory[128] = { 0, 0 }; //malloc(sizeof(memory_region));
+  int found = find_magic_memory(clone_pid, mem_file, memory, extra_filter);
+  if(found <= 0) {
     printf(" [!] Something unexpected happened, new version of packer/protectors? Or it wasn't packed/protected!\n");
     return -1;
   }
 
+  char class_path[strlen(package_name)];
+  strncpy(class_path, package_name, strlen(package_name) + 1);
+  replaceAll(class_path, (char) '.', (char) '/');
+
   printf(" [+] Found %d potentially interesting memory locations...\n", found);
+  int output = 0;
   for(int i = 0; i < found; i++) {
     // Build a safe file to dump to and call the memory dumping function
     char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix) + 1 /* _ */ + (found == 0 ? 1 : (int) (log10(found) + 1) + 1));
-    sprintf(dumped_file_name, "%s%s%s_%d", static_safe_location, package_name, suffix, found);
-    if(dump_memory(mem_file, memory[found], dumped_file_name) <= 0) {
+    sprintf(dumped_file_name, "%s%s%s_%d", static_safe_location, package_name, suffix, output);
+    printf("3 %s\n", dumped_file_name);
+    int result = dump_memory(class_path, mem_file, memory[i], dumped_file_name);
+    if(result < 0) {
       printf(" [!] An issue occurred trying to dump the memory to a file!\n");
       return -1;
+    } else if(result == 0) {
+      // Potential system dex file
+    } else {
+      printf(" [+] Unpacked/protected file dumped to : %s\n", dumped_file_name);
+      output++;
     }
-    printf(" [+] Unpacked/protected file dumped to : %s\n", dumped_file_name);
   }
   close(mem_file);
   ptrace(PTRACE_DETACH, clone_pid, NULL, 0);
   return 1;
+}
+
+void replaceAll(char* str, char oldChar, char newChar) {
+    int i = 0;
+    while(str[i] != '\0') {
+        if(str[i] == oldChar)
+            str[i] = newChar;
+        i++;
+    }
 }
 
 int check_fd(int fd) {
@@ -196,8 +216,7 @@ char *determine_filter(uint32_t clone_pid, int memory_fd) {
       }
     }
   }
-  printf("  [*] Nothing special found, assuming Bangcle...\n");
-  // For now we assume it's Bangcle if above filters failed
+  printf("  [*] Nothing special found, hunting for all dex and odex magic bytes...\n");
 
   return NULL;
 }
@@ -209,7 +228,7 @@ char *determine_filter(uint32_t clone_pid, int memory_fd) {
  *
  * returns number of interesting memory locations found
  */
-int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, char *extra_filter) {
+int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory[], char *extra_filter) {
   char maps[1024];
   snprintf(maps, sizeof(maps), "/proc/%d/maps", clone_pid);
 
@@ -220,7 +239,6 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
   // Scan the /proc/pid/maps file and find possible memory of interest
   // Currently this loops until we find the /last/ odex file which is usually correct
   char mem_line[1024];
-  off64_t offsets[128] = { 0 };
   int found = 0;
   while(fscanf(maps_file, "%[^\n]\n", mem_line) >= 0) {
 
@@ -243,9 +261,9 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, 
     off64_t offset = peek_memory(memory_fd, mem_start);
     if(offset >= 0) {
       // Found a magic
-      memory->start = mem_start + offset;
-      memory->end = strtoull(mem_address_end, NULL, 16);
-      offsets[found++] = offset;
+      memory[found] = malloc(sizeof(memory_region));
+      memory[found]->start = mem_start + offset;
+      memory[found++]->end = strtoull(mem_address_end, NULL, 16);
     } else if(offset == -99) {
       // No offset found
     } else {
@@ -288,11 +306,11 @@ off64_t peek_memory(int memory_file, uint64_t address) {
  * Dump a given memory location via a file descriptor, "memory_region"
  * and a given file_name for output.
  */
-int dump_memory(int memory_fd, memory_region *memory, const char *file_name) {
-  int ret;
+int dump_memory(char* class_path, int memory_fd, memory_region *memory, const char *file_name) {
+  int ret = 0;
   char *buffer = malloc(memory->end - memory->start);
 
-  printf(" [+] Attempting to dump memory region 0x%llx to 0x%llx\n", memory->start, memory->end);
+  printf(" [+] Attempting to search inside memory region 0x%llx to 0x%llx\n", memory->start, memory->end);
 
   if(check_fd < 0) {
     perror(" [!] Appears to be an issue with memory fd ");
@@ -310,16 +328,30 @@ int dump_memory(int memory_fd, memory_region *memory, const char *file_name) {
     return -1;
   }
 
-  FILE *dump = fopen(file_name, "wb");
-  if(fwrite(buffer, memory->end - memory->start, 1, dump) <= 0) {
+  off64_t *contained_offset = memmem(buffer, (size_t)(memory->end - memory->start), class_path, strlen(class_path));
+
+  FILE *dump = NULL;
+
+  if(contained_offset != NULL) {
+    printf(" [+] Memory region 0x%llx to 0x%llx contained anticipated class path %s\n", memory->start, memory->end, class_path);
+
+    FILE *dump = fopen(file_name, "wb");
     ret = -1;
+    if(dump != NULL) {
+      if(fwrite(buffer, memory->end - memory->start, 1, dump) > 0) {
+	ret = 1;
+      }
+
+      fclose(dump);
+    } else {
+      perror(" [!] Error opening a file to write ");
+    }
   } else {
-    ret = 1;
+    printf(" [-] Likely a system file found, ignoring...\n");
+    ret = 0;
   }
 
   free(buffer);
-  fclose(dump);
-
   return ret;
 }
 

@@ -24,10 +24,11 @@ typedef struct {
   uint64_t end;
 } memory_region;
 
+void replaceAll(char* str, char oldChar, char newChar);
 uint32_t get_clone_pid(uint32_t service_pid);
 uint32_t get_process_pid(const char* target_package_name);
 char *determine_filter(uint32_t clone_pid, int memory_fd);
-int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory, char* extra_filter);
+int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory[], char* extra_filter);
 off64_t peek_memory(int memory_file, uint64_t address);
-int dump_memory(int memory_fd, memory_region *memory, const char* file_name);
+int dump_memory(char* package_name, int memory_fd, memory_region *memory, const char* file_name);
 int attach_get_memory(uint32_t pid);
