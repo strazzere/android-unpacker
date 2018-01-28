@@ -11,6 +11,7 @@
  *     - APKProtect (native versions w/ crypto)
  *     - LIAPP (prereleased demo)
  *     - Qihoo Packer
+ *     - Jiagu
  *
  *
  * This will dump the dex or optimized dex (odex) files from
