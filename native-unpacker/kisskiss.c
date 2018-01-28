@@ -312,18 +312,18 @@ int dump_memory(char* class_path, int memory_fd, memory_region *memory, const ch
   printf(" [+] Attempting to search inside memory region 0x%llx to 0x%llx\n", memory->start, memory->end);
 
   if(check_fd < 0) {
-    perror(" [!] Appears to be an issue with memory fd ");
+    perror("  [!] Appears to be an issue with memory fd ");
     return -1;
   }
 
   ssize_t read = pread64(memory_fd, buffer, (size_t)(memory->end - memory->start), (off64_t)(memory->start));
   if(read < 0) {
-    perror(" [!] pread seems to have failed ");
+    perror("  [!] pread seems to have failed ");
     return -1;
   }
 
   if((memory->end - memory->start) != read) {
-    printf(" [!] pread did not read the expected amount of memory!\n");
+    printf("  [!] pread did not read the expected amount of memory!\n");
     return -1;
   }
 
@@ -332,7 +332,7 @@ int dump_memory(char* class_path, int memory_fd, memory_region *memory, const ch
   FILE *dump = NULL;
 
   if(contained_offset != NULL) {
-    printf(" [+] Memory region 0x%llx to 0x%llx contained anticipated class path %s\n", memory->start, memory->end, class_path);
+    printf("  [+] Memory region 0x%llx to 0x%llx contained anticipated class path %s\n", memory->start, memory->end, class_path);
 
     FILE *dump = fopen(file_name, "wb");
     ret = -1;
@@ -343,10 +343,10 @@ int dump_memory(char* class_path, int memory_fd, memory_region *memory, const ch
 
       fclose(dump);
     } else {
-      perror(" [!] Error opening a file to write ");
+      perror("  [!] Error opening a file to write ");
     }
   } else {
-    printf(" [-] Likely a system file found, ignoring...\n");
+    printf("  [-] Likely a system file found, ignoring...\n");
     ret = 0;
   }
 
