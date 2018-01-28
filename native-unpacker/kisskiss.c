@@ -51,12 +51,16 @@ int main(int argc, char *argv[]) {
   }
   printf(" [+] %d is service pid\n", pid);
 
+  uint32_t tracer = checkTracer(pid);
+
   uint32_t clone_pid = get_clone_pid(pid);
   if(clone_pid <= 0) {
     printf(" [!] A suitable clone process could not be found!");
     return -1;
   }
   printf(" [+] %d is clone pid\n", clone_pid);
+
+  uint32_t clone_tracer = checkTracer(clone_pid);
 
   int mem_file = attach_get_memory(clone_pid);
   if(mem_file == -1) {
@@ -100,6 +104,30 @@ int main(int argc, char *argv[]) {
   return 1;
 }
 
+uint32_t checkTracer(uint32_t pid) {
+  char status[1024];
+  snprintf(status, sizeof(status), "/proc/%u/status", pid);
+  FILE *status_file = NULL;
+
+  if((status_file = fopen(status, "r")) == NULL) {
+    perror("  [!] Unable to check status of pid ");
+    return -1;
+  }
+
+  char key[1024];
+  uint32_t value;
+  uint32_t tracerpid = 0;
+  while(fscanf(status_file, "%s\t%u\n", key, &value) >= 0) {
+    if(strcmp(key, "TracerPid:") == 0 && value != 0) {
+      printf("  [*] Warning, process %u seems to be traced by %d, likely an anti-debug trick!\n", pid, value);
+      tracerpid = value;
+    }
+  }
+
+  fclose(status_file);
+  return tracerpid;
+}
+
 void replaceAll(char* str, char oldChar, char newChar) {
     int i = 0;
     while(str[i] != '\0') {
@@ -109,7 +137,7 @@ void replaceAll(char* str, char oldChar, char newChar) {
     }
 }
 
-int check_fd(int fd) {
+int checkFd(int fd) {
   return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
 }
 
@@ -312,7 +340,7 @@ int dump_memory(char* class_path, int memory_fd, memory_region *memory, const ch
 
   printf(" [+] Attempting to search inside memory region 0x%llx to 0x%llx\n", memory->start, memory->end);
 
-  if(check_fd < 0) {
+  if(checkFd < 0) {
     perror("  [!] Appears to be an issue with memory fd ");
     return -1;
   }

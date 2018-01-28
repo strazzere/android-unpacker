@@ -24,7 +24,9 @@ typedef struct {
   uint64_t end;
 } memory_region;
 
+uint32_t checkTracer(uint32_t pid);
 void replaceAll(char* str, char oldChar, char newChar);
+int checkFd(int fd);
 uint32_t get_clone_pid(uint32_t service_pid);
 uint32_t get_process_pid(const char* target_package_name);
 char *determine_filter(uint32_t clone_pid, int memory_fd);
