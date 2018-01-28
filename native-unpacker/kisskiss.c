@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
   // Determine if we are dealing with APKProtect or Bangcle
   char *extra_filter = determine_filter(clone_pid, mem_file);
 
-  memory_region *memory[128] = { 0, 0 }; //malloc(sizeof(memory_region));
+  memory_region *memory[128] = { 0, 0 };
   int found = find_magic_memory(clone_pid, mem_file, memory, extra_filter);
   if(found <= 0) {
     printf(" [!] Something unexpected happened, new version of packer/protectors? Or it wasn't packed/protected!\n");
@@ -84,7 +84,8 @@ int main(int argc, char *argv[]) {
     // Build a safe file to dump to and call the memory dumping function
     char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix) + 1 /* _ */ + (found == 0 ? 1 : (int) (log10(found) + 1) + 1));
     sprintf(dumped_file_name, "%s%s%s_%d", static_safe_location, package_name, suffix, output);
-    int result = dump_memory(class_path, mem_file, memory[i], dumped_file_name);
+
+    int result = dump_memory(class_path, mem_file, memory[i], dumped_file_name, (extra_filter != NULL));
     if(result < 0) {
       printf(" [!] An issue occurred trying to dump the memory to a file!\n");
       return -1;
@@ -306,7 +307,7 @@ off64_t peek_memory(int memory_file, uint64_t address) {
  * Dump a given memory location via a file descriptor, "memory_region"
  * and a given file_name for output.
  */
-int dump_memory(char* class_path, int memory_fd, memory_region *memory, const char *file_name) {
+int dump_memory(char* class_path, int memory_fd, memory_region *memory, const char *file_name, int ignore_class_path) {
   int ret = 0;
   char *buffer = malloc(memory->end - memory->start);
 
@@ -332,8 +333,9 @@ int dump_memory(char* class_path, int memory_fd, memory_region *memory, const ch
 
   FILE *dump = NULL;
 
-  if(contained_offset != NULL) {
-    printf("  [+] Memory region 0x%llx to 0x%llx contained anticipated class path %s\n", memory->start, memory->end, class_path);
+  if(contained_offset != NULL || ignore_class_path == 1) {
+    if(contained_offset != NULL)
+      printf("  [+] Memory region 0x%llx to 0x%llx contained anticipated class path %s\n", memory->start, memory->end, class_path);
 
     FILE *dump = fopen(file_name, "wb");
     ret = -1;

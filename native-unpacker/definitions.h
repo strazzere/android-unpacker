@@ -30,6 +30,13 @@ static packer packers[] = {
     "/app_lib/"
   },
 
+  {
+    "Bangle SGMain version",
+    "A seemingly one off of Bangcle (SecNeo)",
+    "/libsgmain_",
+    "/libsgmain.so"
+  },
+
   /*
   // Jaigu
   {
