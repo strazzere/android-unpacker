@@ -4,6 +4,8 @@
  * Tim "diff" Strazzere <strazz@gmail.com>
  */
 
+#include "definitions.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/ptrace.h>
@@ -29,7 +31,7 @@ void replaceAll(char* str, char oldChar, char newChar);
 int checkFd(int fd);
 uint32_t get_clone_pid(uint32_t service_pid);
 uint32_t get_process_pid(const char* target_package_name);
-char *determine_filter(uint32_t clone_pid, int memory_fd);
+packer  *determine_packer(uint32_t clone_pid, int memory_fd);
 int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory[], char* extra_filter);
 off64_t peek_memory(int memory_file, uint64_t address);
 int dump_memory(char* package_name, int memory_fd, memory_region *memory, const char* file_name, int ignore_class_path);

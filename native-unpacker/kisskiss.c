@@ -25,7 +25,6 @@
  */
 
 #include "kisskiss.h"
-#include "definitions.h"
 
 int main(int argc, char *argv[]) {
 
@@ -69,10 +68,34 @@ int main(int argc, char *argv[]) {
   }
 
   // Determine if we are dealing with APKProtect or Bangcle
-  char *extra_filter = determine_filter(clone_pid, mem_file);
+  packer *found_packer = determine_packer(clone_pid, mem_file);
+  if(found_packer == NULL) {
+    printf("  [*] No packer found on clone_pid %d, falling back to service_pid %d\n", clone_pid, pid);
+    mem_file = attach_get_memory(pid);
+    if(mem_file == -1) {
+      perror(" [!] An error occurred attaching and finding the memory ");
+      return -1;
+    }
+
+    found_packer = determine_packer(pid, mem_file);
+  }
+  if(found_packer != NULL && strcmp(found_packer->name, "Bangle Test") == 0) {
+    printf("  [+] Since filter is Bangle Test, switching to look at the pid attached to service_pid, %d\n", tracer);
+    clone_pid = tracer;
+    mem_file = attach_get_memory(clone_pid);
+    if(mem_file == -1) {
+      perror(" [!] An error occurred attaching and finding the memory ");
+      return -1;
+    }
+  }
+
+  char *filter = NULL;
+  if(found_packer != NULL) {
+    filter = found_packer->filter;
+  }
 
   memory_region *memory[128] = { 0, 0 };
-  int found = find_magic_memory(clone_pid, mem_file, memory, extra_filter);
+  int found = find_magic_memory(clone_pid, mem_file, memory, filter);
   if(found <= 0) {
     printf(" [!] Something unexpected happened, new version of packer/protectors? Or it wasn't packed/protected!\n");
     return -1;
@@ -88,7 +111,7 @@ int main(int argc, char *argv[]) {
     // Build a safe file to dump to and call the memory dumping function
     char *dumped_file_name = malloc(strlen(static_safe_location) + strlen(package_name) + strlen(suffix) + 1 /* _ */ + (found == 0 ? 1 : (int) (log10(found) + 1) + 1));
     sprintf(dumped_file_name, "%s%s%s_%d", static_safe_location, package_name, suffix, output);
-    int result = dump_memory(class_path, mem_file, memory[i], dumped_file_name, (extra_filter != NULL));
+    int result = dump_memory(class_path, mem_file, memory[i], dumped_file_name, (found_packer != NULL));
     if(result < 0) {
       perror(" [!] An issue occurred trying to dump the memory to a file ");
       return -1;
@@ -222,7 +245,7 @@ uint32_t get_process_pid(const char *target_package_name) {
  * Extremely weak filtering process, looks for known shared libs
  * that are mapped to memory.
  */
-char *determine_filter(uint32_t clone_pid, int memory_fd) {
+packer *determine_packer(uint32_t clone_pid, int memory_fd) {
   char maps[1024];
   snprintf(maps, sizeof(maps), "/proc/%d/maps", clone_pid);
 
@@ -238,9 +261,9 @@ char *determine_filter(uint32_t clone_pid, int memory_fd) {
     // Iterate through all markers to find proper filter
     int i;
     for(i = 0; i < sizeof(packers) / sizeof(packers[0]); i++) {
-      if(strstr(mem_line, packers[i].marker)) {
+      if(strstr(mem_line, packers[i].marker) != NULL) {
 	printf("  [*] Found %s\n", packers[i].name);
-	return packers[i].filter;
+	return &packers[i];
       }
     }
   }
@@ -272,12 +295,13 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory[]
 
     // For APKProtect we want the odex file that is mapped to memory
     // so we are looking for an extra_filter match on the odex
-    if(extra_filter != NULL && !strstr(mem_line, extra_filter))
+    if(extra_filter != NULL && strstr(mem_line, extra_filter) == NULL) {
       continue;
+    }
 
     // Otherwise we are looking for the location that bangcle allocates the odex to,
     // this is a very ugly way to just try and get the directly mapped meory
-    if(extra_filter == NULL && (strstr(mem_line, "/") || strstr(mem_line, "[")))
+    if(extra_filter == NULL && (strstr(mem_line, "/") != NULL || strstr(mem_line, "[") != NULL))
       continue;
 
     char mem_address_start[10];
@@ -285,8 +309,14 @@ int find_magic_memory(uint32_t clone_pid, int memory_fd, memory_region *memory[]
     sscanf(mem_line, "%8[^-]-%8[^ ]", mem_address_start, mem_address_end);
 
     uint64_t mem_start = strtoul(mem_address_start, NULL, 16);
+
     // Peek and see if the memory is what we wanted
     off64_t offset = peek_memory(memory_fd, mem_start);
+    // If we had a filter and didn't find a dex or odex, just return it anyway
+    // This allows us to return non-dex file things (like an apk, jar or zip)
+    if(extra_filter != NULL && offset < 0)
+      offset = 0;
+
     if(offset >= 0) {
       // Found a magic
       memory[found] = malloc(sizeof(memory_region));
