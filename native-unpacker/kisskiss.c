@@ -340,7 +340,7 @@ off64_t peek_memory(int memory_file, uint64_t address) {
 
   int read = pread64(memory_file, buffer, 8, address);
   if(read < 0) {
-    perror(" [!] pread seems to have failed ");
+    fprintf(stderr, "  [!] pread seems to have failed at 0x%llx\n", address);
     return -1;
   }
 
@@ -377,7 +377,7 @@ int dump_memory(char* class_path, int memory_fd, memory_region *memory, const ch
 
   ssize_t read = pread64(memory_fd, buffer, (size_t)(memory->end - memory->start), (off64_t)(memory->start));
   if(read < 0) {
-    perror("  [!] pread seems to have failed ");
+    fprintf(stderr, "  [!] pread seems to have failed for 0x%llx to 0x%llx\n", memory->start, memory->end);
     return -1;
   }
 
