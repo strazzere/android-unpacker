@@ -1,4 +1,5 @@
 LOCAL_ARM_MODE := arm
+abi?=x86_64
 
 all: check build
 
@@ -11,7 +12,7 @@ build:
 	ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk
 
 install:
-	adb push libs/armeabi/kisskiss /data/local/tmp/
+	adb push libs/$(abi)/kisskiss /data/local/tmp/
 
 clean:
 	rm -rf *.c~
