@@ -10,6 +10,7 @@ Contents
  - gdb-scripts/ - Bash script for unpacking bangcle/secshell; requires gdb/adb
  - native-unpacker/ - Unpacker for APKProtect/Bangcle/LIAPP/Qihoo Packer that runs natively, no dependency on gdb
  - hide-qemu/ - Small hacks for hiding the qemu/debuggers, specifically from APKProtect
+ - corellium-android-unpacking/ - A more realistic approach to unpacking things, dynamically and with automation around it
 
 Disclaimer
 ----------
@@ -19,7 +20,7 @@ This presentation and code are meant for education and research purposes only. D
 License
 -------
 
-    Copyright 2014-2018 Tim 'diff' Strazzere <strazz@gmail.com>
+    Copyright 2014-2020 Tim 'diff' Strazzere <diff@protonmail.com>
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

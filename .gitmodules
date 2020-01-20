@@ -1,0 +1,3 @@
+[submodule "corellium-android-unpacking"]
+	path = corellium-android-unpacking
+	url = https://github.com/corellium/corellium-android-unpacking
